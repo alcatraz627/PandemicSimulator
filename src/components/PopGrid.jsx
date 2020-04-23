@@ -27,8 +27,8 @@ const PopGrid = props => {
 
 
     const rowLength = gridData.length
-    const cellWidth = CANVAS_WIDTH / rowLength
-    const cellPad = 0.05 * cellWidth
+    const cellWidth = Math.floor(CANVAS_WIDTH / rowLength)
+    const cellPad = (0.1 * cellWidth)
 
 
     return <div className={classes.container}>

@@ -6,6 +6,7 @@
   "dependencies": {
     "@bucky24/react-canvas": "^1.0.3",
     "@material-ui/core": "^4.9.11",
+    "@material-ui/icons": "^4.9.1",
     "css-loader": "^3.0.0",
     "file-loader": "^4.0.0",
     "lodash": "^4.17.11",
