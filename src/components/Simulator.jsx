@@ -24,21 +24,26 @@ const getNeighbors = (x, y, size) => _.filter(
     ({ x, y }) => (x >= 0) && (y >= 0) && (x < size) && (y < size))
 
 const Simulator = props => {
-    const SIZE = 7
+    const SIZE = 11
 
     const [grid, setGrid] = useState(createGrid(SIZE))
     const [tick, setTick] = useState(0)
     const [isRunning, setRunning] = useState(false)
 
+    const [tr, setTr] = useState(2)
+
     const updateCells = (batch, phase) => {
         // let newGrid = Object.assign([], grid)
         // console.log("To Update: ", batch);
-        let newGrid = _.cloneDeep(grid)
-        _.map(batch, ({ x, y }) => {
-            // console.log(`Upd ${x}, ${y} to ${phase}`);
-            newGrid[y][x].phase = phase
+        setGrid(grid => {
+            let newGrid = _.cloneDeep(grid)
+            _.map(batch, ({ x, y }) => {
+                // console.log(`Upd ${x}, ${y} to ${phase}`);
+                newGrid[y][x].phase = phase
+                newGrid[y][x].ti = tick
+            })
+            return newGrid;
         })
-        setGrid(newGrid)
     }
 
     let tickerID = useRef()
@@ -56,22 +61,31 @@ const Simulator = props => {
 
     useEffect(() => {
         if (tick > 0) {
-            const infected = _.filter(_.flatten(grid), c => (c.phase == PHASE.I));
-            // console.log(infected);
-            // console.log("Ended?", infected.length, SIZE * SIZE);
-            if (infected.length == SIZE * SIZE) {
-                pause()
-                return
-            }
-            let cellsToInfect = []
 
+            const infected = _.filter(_.flatten(grid), c => (c.phase == PHASE.I));
+            // const infected = _.filter(_.flatten(grid), c => (c.phase == PHASE.I));
+            // if (infected.length == SIZE * SIZE) { pause(); return } //Check if final 
+
+            let cellsToInfect = [], cellsToRecover = []
+
+            // To infect next
             _.map(infected, c => {
-                const neighbors = getNeighbors(c.x, c.y, SIZE)
-                // console.log(_.filter(neighbors, x => x));
-                cellsToInfect = [...cellsToInfect, ...(_.filter(neighbors, ({ x, y }) => grid[y][x].phase == PHASE.S))]
+                cellsToInfect = [...cellsToInfect, ...(_.filter(getNeighbors(c.x, c.y, SIZE), ({ x, y }) => grid[y][x].phase == PHASE.S))]
             })
-            // console.log("cellsToInfect", cellsToInfect);
             updateCells(cellsToInfect, PHASE.I)
+
+            // To recover
+            cellsToRecover = _.filter(infected, ({ x, y }) => (grid[y][x].ti + tr <= tick))
+            // _.map(infected, c => {
+            //     console.log(c.ti + tr <= tick);
+            // })
+            // //     cellsToRecover = [...cellsToRecover, 
+
+            // //         // ...(_.filter(getNeighbors(c.x, c.y, SIZE), ({ x, y }) => grid[y][x].phase == PHASE.S))
+            // //     ]
+            updateCells(cellsToRecover, PHASE.R)
+
+
 
         } else {
             setGrid(createGrid(SIZE))
