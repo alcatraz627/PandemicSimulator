@@ -19,7 +19,9 @@ const createGrid = (size) => {
     return _.chunk(_.map(Array(size * size), (_GARBAGE_, i) => createCell(i % size, Math.floor(i / size), i == Math.floor(size * size / 2) ? PHASE.I : PHASE.S)), size)
 }
 
-const getNeighbors = (x, y) => ([{ x: x - 1, y: y }, { x: x, y: y - 1 }, { x: x + 1, y: y }, { x: x, y: y + 1 }])
+const getNeighbors = (x, y, size) => _.filter(
+    [{ x: x - 1, y: y }, { x: x, y: y - 1 }, { x: x + 1, y: y }, { x: x, y: y + 1 }],
+    ({ x, y }) => (x >= 0) && (y >= 0) && (x < size) && (y < size))
 
 const Simulator = props => {
     const SIZE = 7
@@ -27,6 +29,17 @@ const Simulator = props => {
     const [grid, setGrid] = useState(createGrid(SIZE))
     const [tick, setTick] = useState(0)
     const [isRunning, setRunning] = useState(false)
+
+    const updateCells = (batch, phase) => {
+        // let newGrid = Object.assign([], grid)
+        // console.log("To Update: ", batch);
+        let newGrid = _.cloneDeep(grid)
+        _.map(batch, ({ x, y }) => {
+            // console.log(`Upd ${x}, ${y} to ${phase}`);
+            newGrid[y][x].phase = phase
+        })
+        setGrid(newGrid)
+    }
 
     let tickerID = useRef()
     let lastUpdate = useRef()
@@ -44,11 +57,21 @@ const Simulator = props => {
     useEffect(() => {
         if (tick > 0) {
             const infected = _.filter(_.flatten(grid), c => (c.phase == PHASE.I));
-            console.log(infected);
-            // _.map(infected, c => {
-            // const neighbors = getNeighbors(c.x, c.y)
+            // console.log(infected);
+            // console.log("Ended?", infected.length, SIZE * SIZE);
+            if (infected.length == SIZE * SIZE) {
+                pause()
+                return
+            }
+            let cellsToInfect = []
 
-            // })
+            _.map(infected, c => {
+                const neighbors = getNeighbors(c.x, c.y, SIZE)
+                // console.log(_.filter(neighbors, x => x));
+                cellsToInfect = [...cellsToInfect, ...(_.filter(neighbors, ({ x, y }) => grid[y][x].phase == PHASE.S))]
+            })
+            // console.log("cellsToInfect", cellsToInfect);
+            updateCells(cellsToInfect, PHASE.I)
 
         } else {
             setGrid(createGrid(SIZE))
@@ -73,7 +96,7 @@ const Simulator = props => {
     return <Container>
         <Typography variant="h6">Pandemic Simulator</Typography>
         <PopGrid gridData={grid} />
-        <TickControls tick={tick} isRunning={isRunning} start={start} reset={reset} pause={pause} step={step}/>
+        <TickControls tick={tick} isRunning={isRunning} start={start} reset={reset} pause={pause} step={step} />
         <Divider />
         {JSON.stringify(grid)}
     </Container>
