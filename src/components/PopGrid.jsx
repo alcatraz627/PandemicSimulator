@@ -8,8 +8,10 @@ const CANVAS_WIDTH = 600;
 
 const P_COLORS = {
     S: 'lightgrey',
+    i: 'pink',
     I: 'red',
-    R: 'grey'
+    R: 'grey',
+    D: 'darkgrey',
 }
 
 const useStyles = makeStyles(theme => ({

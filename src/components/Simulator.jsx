@@ -6,9 +6,11 @@ import PopGrid from './PopGrid'
 import TickControls from './TickControls'
 
 const PHASE = {
-    S: 'S',
-    I: 'I',
-    R: 'R'
+    S: 'S', // Susceptible
+    i: 'i', // incubating
+    I: 'I', // Infected
+    R: 'R', // Recovered
+    D: 'D' //Dead
 }
 
 
@@ -30,7 +32,8 @@ const Simulator = props => {
     const [tick, setTick] = useState(0)
     const [isRunning, setRunning] = useState(false)
 
-    const [tr, setTr] = useState(2)
+    const [T_inc, setT_inc] = useState(2) //Incubation Period
+    const [T_r, setT_r] = useState(3) // Recovery Period
 
     const updateCells = (batch, phase) => {
         // let newGrid = Object.assign([], grid)
@@ -62,27 +65,24 @@ const Simulator = props => {
     useEffect(() => {
         if (tick > 0) {
 
-            const infected = _.filter(_.flatten(grid), c => (c.phase == PHASE.I));
+            const infected = _.filter(_.flatten(grid), c => ((c.phase == PHASE.I) || (c.phase == PHASE.i)));
             // const infected = _.filter(_.flatten(grid), c => (c.phase == PHASE.I));
             // if (infected.length == SIZE * SIZE) { pause(); return } //Check if final 
 
-            let cellsToInfect = [], cellsToRecover = []
+            let cellsToInfect = [], cellsToRecover = [], cellsToShowSymptoms = []
 
             // To infect next
             _.map(infected, c => {
                 cellsToInfect = [...cellsToInfect, ...(_.filter(getNeighbors(c.x, c.y, SIZE), ({ x, y }) => grid[y][x].phase == PHASE.S))]
             })
-            updateCells(cellsToInfect, PHASE.I)
+            updateCells(cellsToInfect, PHASE.i)
+
+            // To show symptoms
+            cellsToShowSymptoms = _.filter(infected, c => (c.phase == PHASE.i) && (c.ti + T_inc <= tick))
+            updateCells(cellsToShowSymptoms, PHASE.I)
 
             // To recover
-            cellsToRecover = _.filter(infected, ({ x, y }) => (grid[y][x].ti + tr <= tick))
-            // _.map(infected, c => {
-            //     console.log(c.ti + tr <= tick);
-            // })
-            // //     cellsToRecover = [...cellsToRecover, 
-
-            // //         // ...(_.filter(getNeighbors(c.x, c.y, SIZE), ({ x, y }) => grid[y][x].phase == PHASE.S))
-            // //     ]
+            cellsToRecover = _.filter(infected, ({ x, y }) => (grid[y][x].ti + T_r <= tick))
             updateCells(cellsToRecover, PHASE.R)
 
 
