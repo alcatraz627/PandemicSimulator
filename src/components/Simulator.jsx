@@ -1,10 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react'
 import _ from 'lodash'
 import { Grid, Typography, Container, Divider } from '@material-ui/core'
+import { makeStyles } from '@material-ui/core/styles'
 
 import PopGrid from './PopGrid'
 import TickControls from './TickControls'
 import ParamSliders from './ParamSliders'
+
+const useStyles = makeStyles(theme => ({
+    root: {
+        margin: 'auto',
+        padding: '100px 0'
+    }
+}))
 
 const PHASE = {
     S: 'S', // Susceptible
@@ -15,6 +23,13 @@ const PHASE = {
 }
 
 const FRAME_RATE = 0
+
+const INITIAL_PARAMS = {
+    T_inc: 2, //Incubation Period
+    T_r: 3, // Recovery Period
+    R_naught: 0.2, // Infection Rate
+    R_mort: 0.2, // Mortality Rate
+}
 
 
 const createCell = (x, y, phase = PHASE.S, ti = null, tr = null) => ({ x, y, phase, ti, tr })
@@ -29,16 +44,18 @@ const getNeighbors = (x, y, size) => _.filter(
     ({ x, y }) => (x >= 0) && (y >= 0) && (x < size) && (y < size))
 
 const Simulator = props => {
+    const classes = useStyles()
+
     const SIZE = 31
 
     const [grid, setGrid] = useState(createGrid(SIZE))
     const [tick, setTick] = useState(0)
     const [isRunning, setRunning] = useState(false)
 
-    const [T_inc, setT_inc] = useState(2) //Incubation Period
-    const [T_r, setT_r] = useState(3) // Recovery Period
-    const [R_naught, setR_naught] = useState(0.2) // Infection Rate
-    const [R_mort, setR_mort] = useState(0.2) // Mortality Rate
+    const [T_inc, setT_inc] = useState(INITIAL_PARAMS.T_inc) //Incubation Period
+    const [T_r, setT_r] = useState(INITIAL_PARAMS.T_r) // Recovery Period
+    const [R_naught, setR_naught] = useState(INITIAL_PARAMS.R_naught) // Infection Rate
+    const [R_mort, setR_mort] = useState(INITIAL_PARAMS.R_mort) // Mortality Rate
 
     const updateCells = (batch, phase) => {
         // let newGrid = Object.assign([], grid)
@@ -124,9 +141,16 @@ const Simulator = props => {
         T_r, setT_r,
         R_naught, setR_naught,
         R_mort, setR_mort,
+        resetParams: () => {
+            setT_inc(INITIAL_PARAMS.T_inc);
+            setT_r(INITIAL_PARAMS.T_r);
+            setR_naught(INITIAL_PARAMS.R_naught);
+            setR_mort(INITIAL_PARAMS.R_mort);
+
+        }
     }
 
-    return <Container>
+    return <Container className={classes.root}>
         <Grid container>
             <Grid item md={6} xs={12}>
                 <Typography variant="h5">Visualization of the population health</Typography>

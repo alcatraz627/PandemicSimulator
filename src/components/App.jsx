@@ -27,10 +27,9 @@ const App = () => {
         <ThemeProvider theme={theme}>
             <AppBar>
                 <Toolbar>
-                    <Typography variant="h5">Pandemic Simulator 2</Typography>
+                    <Typography variant="h6">Pandemic Simulator</Typography>
                 </Toolbar>
             </AppBar>
-            <div style={{ margin: "80px" }} />
             <Simulator />
         </ThemeProvider>
     )
