@@ -6,6 +6,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import PopGrid from './PopGrid'
 import TickControls from './TickControls'
 import ParamSliders from './ParamSliders'
+import ChartData from './ChartData'
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -30,26 +31,33 @@ const INITIAL_PARAMS = {
     R_naught: 0.2, // Infection Rate
     R_mort: 0.2, // Mortality Rate,
     D_travel: 3, // Travel radius
+    N_init: 1, // Count of initial population affected
 }
 
 
 const createCell = (x, y, phase = PHASE.S, ti = null, tr = null) => ({ x, y, phase, ti, tr })
 
-const createGrid = (size) => {
+const createGrid = (size, N_init) => {
     // const seed = (x, y) => ((Math.floor(size / 3) == x) && (Math.floor(size / 3) == y)) ? PHASE.I : PHASE.S
-    return _.chunk(_.map(Array(size * size), (_GARBAGE_, i) => createCell(i % size, Math.floor(i / size), i == Math.floor(size * size / 2 ) ? PHASE.I : PHASE.S)), size)
+    // const seed = (x, y) => (i == Math.floor(size * size / 2))
+    const seed = _.map(Array(N_init), (x, j) => Math.floor(size * size * Math.random())) // To formulate how will the initial population be infected. // TODO: Add predefined modes 
+    // console.log(seed);
+    return _.chunk(_.map(Array(size * size), (_GARBAGE_, i) => createCell(i % size, Math.floor(i / size), seed.includes(i) ? PHASE.I : PHASE.S)), size)
 }
 
 const isValidCoord = ({ x, y, size }) => (x >= 0) && (y >= 0) && (x < size) && (y < size)
 
 const getNeighbors = (x, y, size) => _.filter([{ x: x - 1, y: y }, { x: x, y: y - 1 }, { x: x + 1, y: y }, { x: x, y: y + 1 }], n => isValidCoord({ ...n, size }))
 
+const createHistorySlice = ({ susceptible = 0, incubating = 0, symptomatic = 0, recovered = 0, dead = 0 }) => ({ susceptible, incubating, symptomatic, recovered, dead })
+
+
 const Simulator = props => {
     const classes = useStyles()
 
-    const SIZE = 51
+    const SIZE = 21
 
-    const [grid, setGrid] = useState(createGrid(SIZE))
+    const [grid, setGrid] = useState(createGrid(SIZE, INITIAL_PARAMS.N_init))
     const [tick, setTick] = useState(0)
     const [isRunning, setRunning] = useState(false)
 
@@ -57,8 +65,10 @@ const Simulator = props => {
     const [T_r, setT_r] = useState(INITIAL_PARAMS.T_r) // Recovery Period
     const [R_naught, setR_naught] = useState(INITIAL_PARAMS.R_naught) // Infection Rate
     const [R_mort, setR_mort] = useState(INITIAL_PARAMS.R_mort) // Mortality Rate
-
     const [D_travel, setD_travel] = useState(INITIAL_PARAMS.D_travel) // Mortality Rate
+    const [N_init, setN_init] = useState(INITIAL_PARAMS.N_init) // Count of initial pop infected
+
+    const [history, setHistory] = useState({})
 
     const updateCells = (batch, phase) => {
         // let newGrid = Object.assign([], grid)
@@ -89,7 +99,6 @@ const Simulator = props => {
 
     useEffect(() => {
         if (tick > 0) {
-
             const infected = _.filter(_.flatten(grid), c => ((c.phase == PHASE.I) || (c.phase == PHASE.i)));
             // const infected = _.filter(_.flatten(grid), c => (c.phase == PHASE.I));
             // if (infected.length == SIZE * SIZE) { pause(); return } //Check if final 
@@ -106,7 +115,7 @@ const Simulator = props => {
                     x: Math.floor(cx + Math.cos(angle) * D_travel),
                     y: Math.floor(cy + Math.sin(angle) * D_travel),
                 }
-                console.log("From", cx, cy, " to ", newCoord, "; >>>", isValidCoord({ ...newCoord, size: SIZE }))
+                // console.log("From", cx, cy, " to ", newCoord, "; >>>", isValidCoord({ ...newCoord, size: SIZE }))
                 if (isValidCoord({ ...newCoord, size: SIZE }) && (grid[newCoord.y][newCoord.x].phase == PHASE.S) && (Math.random() < R_naught)) {
                     cellsToInfect.push(grid[newCoord.y][newCoord.x])
                 }
@@ -132,8 +141,20 @@ const Simulator = props => {
             updateCells(cellsToRecover, PHASE.R)
             updateCells(cellsToKill, PHASE.D)
 
+            setHistory(history => [...history, createHistorySlice({
+
+                susceptible: _.filter(_.flatten(grid), c => (c.phase == PHASE.S)).length,
+                incubating: _.filter(infected, c => c.phase == PHASE.i).length,
+                symptomatic: _.filter(infected, c => c.phase == PHASE.I).length,
+                recovered: _.filter(_.flatten(grid), c => (c.phase == PHASE.R)).length,
+                dead: _.filter(_.flatten(grid), c => (c.phase == PHASE.D)).length,
+
+            })])
+
+
         } else {
-            setGrid(createGrid(SIZE))
+            setGrid(createGrid(SIZE, N_init))
+            setHistory([])
         }
     }, [tick])
 
@@ -147,6 +168,10 @@ const Simulator = props => {
         }
     }, [isRunning])
 
+    useEffect(() => {
+        if ((tick == 0) && !isRunning) setGrid(createGrid(SIZE, N_init))
+    }, [N_init])
+
     const start = () => { setRunning(true) }
     const pause = () => { setRunning(false) }
     const reset = () => { setRunning(false); setTick(0) }
@@ -158,13 +183,17 @@ const Simulator = props => {
         R_naught, setR_naught,
         R_mort, setR_mort,
         D_travel, setD_travel,
+        N_init, setN_init,
+        isRunning, tick,
+        history,
         resetParams: () => {
             setT_inc(INITIAL_PARAMS.T_inc);
             setT_r(INITIAL_PARAMS.T_r);
             setR_naught(INITIAL_PARAMS.R_naught);
             setR_mort(INITIAL_PARAMS.R_mort);
             setD_travel(INITIAL_PARAMS.D_travel);
-        }
+            setN_init(INITIAL_PARAMS.N_init);
+        },
     }
 
     return <div className={classes.root}>
@@ -173,10 +202,10 @@ const Simulator = props => {
                 <Typography variant="h5">Visualization of the population health</Typography>
                 <br />
                 <PopGrid gridData={grid} />
-                <TickControls tick={tick} isRunning={isRunning} start={start} reset={reset} pause={pause} step={step} />
+                <TickControls tick={tick} isRunning={isRunning} start={start} reset={reset} pause={pause} step={step}/>
             </Grid>
             <Grid item md={7} xs={12}>
-            {/* </Grid>
+                {/* </Grid>
             <Grid item md={12} xs={12}> */}
                 <ParamSliders {...paramSliderParams} />
             </Grid>

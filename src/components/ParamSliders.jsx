@@ -4,6 +4,8 @@ import { Slider, Typography, Button, Divider, Grid } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import { purple } from '@material-ui/core/colors'
 
+import ChartData from './ChartData'
+
 const useStyles = makeStyles(theme => ({
     root: {
         // border: '1px dotted red',
@@ -35,7 +37,9 @@ const ParamSliders = props => {
         R_naught, setR_naught,
         R_mort, setR_mort,
         D_travel, setD_travel,
-
+        N_init, setN_init,
+        
+        isRunning, tick, history,
         resetParams
     } = props
 
@@ -46,12 +50,13 @@ const ParamSliders = props => {
         <br />
         <Grid container spacing={2}>
             <Grid item sm={12} md={6}>
+            <ChartData history={history} />
             </Grid>
 
             <Grid item sm={12} md={6}>
                 <div className={classes.sliderBox}>
                     <Typography variant="h5">Effect of Human Activities</Typography>
-                    <Typography variant="body2">Lorem ipsum dolor sit amet consectetur adipisicing elit. Saepe alias veniam quaerat eum sequi totam architecto ea consequuntur! Sequi laboriosam expedita sint vel, reiciendis perspiciatis nihil cupiditate distinctio soluta. Voluptate!</Typography>
+                    {/* <Typography variant="body2">Lorem ipsum dolor sit amet consectetur adipisicing elit. Saepe alias veniam quaerat eum sequi totam architecto ea consequuntur! Sequi laboriosam expedita sint vel, reiciendis perspiciatis nihil cupiditate distinctio soluta. Voluptate!</Typography> */}
 
                     <Divider className={classes.inSection} />
                     <Slider valueLabelDisplay="on" value={D_travel} onChange={(e, v) => { setD_travel(v) }}
@@ -59,19 +64,19 @@ const ParamSliders = props => {
                     <Typography variant="h6">Average travel radius</Typography>
                     <Typography variant="subtitle1">How far does an infected person travel and create new hotspots</Typography>
 
-                    {/* <Divider className={classes.inSection} />
+                    <Divider className={classes.inSection} />
 
-            <Slider valueLabelDisplay="on" value={R_mort} onChange={(e, v) => { setR_mort(v) }}
-                min={0} max={1} marks step={0.05} />
-            <Typography variant="h6">Mortality rate</Typography>
-            <Typography variant="subtitle1">How likely is a patient to die</Typography> */}
+                    <Slider valueLabelDisplay="on" value={N_init} onChange={(e, v) => { setN_init(v) }}
+                        min={1} max={50} marks step={1} disabled={isRunning || tick > 0} />
+                    <Typography variant="h6">Number of people in the initial Population Infected</Typography>
+                    <Typography variant="subtitle1">Jamaati niggas</Typography>
                 </div>
             </Grid>
 
             <Grid item sm={12} md={6}>
                 <div className={classes.sliderBox}>
                     <Typography variant="h5">Incubation Period</Typography>
-                    <Typography variant="body2">Lorem ipsum dolor sit amet consectetur adipisicing elit. Saepe alias veniam quaerat eum sequi totam architecto ea consequuntur! Sequi laboriosam expedita sint vel, reiciendis perspiciatis nihil cupiditate distinctio soluta. Voluptate!</Typography>
+                    {/* <Typography variant="body2">Lorem ipsum dolor sit amet consectetur adipisicing elit. Saepe alias veniam quaerat eum sequi totam architecto ea consequuntur! Sequi laboriosam expedita sint vel, reiciendis perspiciatis nihil cupiditate distinctio soluta. Voluptate!</Typography> */}
 
                     <Divider className={classes.inSection} />
                     <Slider valueLabelDisplay="on" value={T_inc} onChange={(e, v) => { setT_inc(v) }}
@@ -84,25 +89,25 @@ const ParamSliders = props => {
                     <Slider valueLabelDisplay="on" value={T_r} onChange={(e, v) => { setT_r(v) }}
                         min={1} max={40} marks step={1} />
                     <Typography variant="h6">Recovery period</Typography>
-                    <Typography variant="subtitle1">The number of days it usually takes a patient to heal</Typography>
+                    <Typography variant="subtitle1">The number of days it usually takes a patient to heal once symptoms show</Typography>
                 </div>
             </Grid>
 
             <Grid item sm={12} md={6}>
                 <div className={classes.sliderBox}>
                     <Typography variant="h5">Virus Action</Typography>
-                    <Typography variant="body2">Lorem ipsum dolor sit amet consectetur adipisicing elit. Saepe alias veniam quaerat eum sequi totam architecto ea consequuntur! Sequi laboriosam expedita sint vel, reiciendis perspiciatis nihil cupiditate distinctio soluta. Voluptate!</Typography>
+                    {/* <Typography variant="body2">Lorem ipsum dolor sit amet consectetur adipisicing elit. Saepe alias veniam quaerat eum sequi totam architecto ea consequuntur! Sequi laboriosam expedita sint vel, reiciendis perspiciatis nihil cupiditate distinctio soluta. Voluptate!</Typography> */}
 
                     <Divider className={classes.inSection} />
                     <Slider valueLabelDisplay="on" value={R_naught} onChange={(e, v) => { setR_naught(v) }}
-                        min={0} max={1} marks step={0.05} />
+                        min={0} max={1} step={0.05} />
                     <Typography variant="h6">Transmission rate</Typography>
                     <Typography variant="subtitle1">R0, The basic reproduction number</Typography>
 
                     <Divider className={classes.inSection} />
 
                     <Slider valueLabelDisplay="on" value={R_mort} onChange={(e, v) => { setR_mort(v) }}
-                        min={0} max={1} marks step={0.05} />
+                        min={0} max={1} step={0.05} />
                     <Typography variant="h6">Mortality rate</Typography>
                     <Typography variant="subtitle1">How likely is a patient to die</Typography>
                 </div>

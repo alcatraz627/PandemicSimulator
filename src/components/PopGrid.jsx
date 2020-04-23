@@ -38,15 +38,10 @@ const PopGrid = props => {
     const sideCorrection = 1 * (CANVAS_WIDTH - cellWidth * rowLength)
 
 
-    useEffect(() => {
-        console.log("contElem", contElem.current.clientWidth);
-    }, [contElem.current])
-
-
     return <div className={classes.root} ref={contElem}>
         <Canvas width={CANVAS_WIDTH - sideCorrection} height={CANVAS_WIDTH - sideCorrection}>
             {/* <Rect x={0} y={0} x2={600} y2={600} fill={true} color="blue" /> */}
-            {gridData.map((row, y) => row.map((cell, x) => <Rect key={`cell${x}${y}`} fill={true} color={P_COLORS[cell.phase]}
+            {gridData.map((row, y) => row.map((cell, x) => <Rect key={`cell${x}${y}${cell.phase}`} fill={true} color={P_COLORS[cell.phase]}
                 x={x * cellWidth + cellPad} y={y * cellWidth + cellPad} x2={(x + 1) * cellWidth - cellPad} y2={(y + 1) * cellWidth - cellPad} />))}
 
 
