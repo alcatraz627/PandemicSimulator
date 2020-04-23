@@ -15,10 +15,11 @@ const P_COLORS = {
 }
 
 const useStyles = makeStyles(theme => ({
-    container: {
-        border: '1px dotted red',
-        display: 'inline-block',
-        margin: 'auto'
+    root: {
+        // border: '1px dotted red',
+        textAlign: 'auto',
+        margin: 'auto',
+        display: 'flex'
     }
 }))
 
@@ -27,13 +28,12 @@ const PopGrid = props => {
 
     const { gridData } = props
 
-
     const rowLength = gridData.length
-    const cellWidth = Math.floor(CANVAS_WIDTH / rowLength)
+    const cellWidth = Math.floor(1 * CANVAS_WIDTH / rowLength)
     const cellPad = (0.1 * cellWidth)
 
 
-    return <div className={classes.container}>
+    return <div className={classes.root}>
         <Canvas width={CANVAS_WIDTH} height={CANVAS_WIDTH}>
             {gridData.map((row, y) => row.map((cell, x) => <Rect key={`cell${x}${y}`} fill={true} color={P_COLORS[cell.phase]}
                 x={x * cellWidth + cellPad} y={y * cellWidth + cellPad} x2={(x + 1) * cellWidth - cellPad} y2={(y + 1) * cellWidth - cellPad} />))}

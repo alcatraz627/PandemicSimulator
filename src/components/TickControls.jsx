@@ -18,6 +18,12 @@ const useStyles = makeStyles(theme => ({
     },
     btn: {
         margin: '0 15px'
+    },
+    textRunning: {
+        color: theme.palette.success.dark
+    },
+    textPaused: {
+        color: theme.palette.info.dark
     }
 }))
 
@@ -26,9 +32,11 @@ const TickControls = props => {
     const classes = useStyles()
 
     return <div className={classes.root}>
-        <Typography variant="h5">Day {tick + 1}</Typography>
-        <Typography variant="button">{isRunning ? "Running" : "Stopped"}</Typography>
-        <Divider />
+        <div className={classes[isRunning?'textRunning':'textPaused']}>
+
+            <Typography variant="h5">Day {tick + 1}</Typography>
+            <Typography variant="button">{isRunning ? "Running" : "Stopped"}</Typography>
+        </div>
         <div className={classes.btnGrp}>
             <Fab className={classes.btn} onClick={pause} color="primary" disabled={!isRunning}><Pause /></Fab>
             <Fab className={classes.btn} onClick={start} color="primary" disabled={isRunning}><PlayArrow /></Fab>

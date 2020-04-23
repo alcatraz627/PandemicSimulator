@@ -4,6 +4,7 @@ import { Grid, Typography, Container, Divider } from '@material-ui/core'
 
 import PopGrid from './PopGrid'
 import TickControls from './TickControls'
+import ParamSliders from './ParamSliders'
 
 const PHASE = {
     S: 'S', // Susceptible
@@ -13,7 +14,7 @@ const PHASE = {
     D: 'D' //Dead
 }
 
-const FRAME_RATE = 300
+const FRAME_RATE = 0
 
 
 const createCell = (x, y, phase = PHASE.S, ti = null, tr = null) => ({ x, y, phase, ti, tr })
@@ -28,7 +29,7 @@ const getNeighbors = (x, y, size) => _.filter(
     ({ x, y }) => (x >= 0) && (y >= 0) && (x < size) && (y < size))
 
 const Simulator = props => {
-    const SIZE = 11
+    const SIZE = 31
 
     const [grid, setGrid] = useState(createGrid(SIZE))
     const [tick, setTick] = useState(0)
@@ -36,6 +37,7 @@ const Simulator = props => {
 
     const [T_inc, setT_inc] = useState(2) //Incubation Period
     const [T_r, setT_r] = useState(3) // Recovery Period
+    const [R_naught, setR_naught] = useState(0.2) // Infection Rate
     const [R_mort, setR_mort] = useState(0.2) // Mortality Rate
 
     const updateCells = (batch, phase) => {
@@ -79,7 +81,7 @@ const Simulator = props => {
 
             // To infect next
             _.map(infected, c => {
-                cellsToInfect = [...cellsToInfect, ...(_.filter(getNeighbors(c.x, c.y, SIZE), ({ x, y }) => grid[y][x].phase == PHASE.S))]
+                cellsToInfect = [...cellsToInfect, ...(_.filter(getNeighbors(c.x, c.y, SIZE), ({ x, y }) => (grid[y][x].phase == PHASE.S) && (Math.random() < R_naught)))]
             })
             updateCells(cellsToInfect, PHASE.i)
 
@@ -117,12 +119,25 @@ const Simulator = props => {
     const reset = () => { setRunning(false); setTick(0) }
     const step = () => { setTick(tick => tick + 1) }
 
+    const paramSliderParams = {
+        T_inc, setT_inc,
+        T_r, setT_r,
+        R_naught, setR_naught,
+        R_mort, setR_mort,
+    }
+
     return <Container>
-        <Typography variant="h6">Pandemic Simulator</Typography>
-        <PopGrid gridData={grid} />
-        <TickControls tick={tick} isRunning={isRunning} start={start} reset={reset} pause={pause} step={step} />
-        <Divider />
-        {JSON.stringify(grid)}
+        <Grid container>
+            <Grid item md={6} xs={12}>
+                <Typography variant="h5">Visualization of the population health</Typography>
+                <br />
+                <PopGrid gridData={grid} />
+                <TickControls tick={tick} isRunning={isRunning} start={start} reset={reset} pause={pause} step={step} />
+            </Grid>
+            <Grid item md={6} xs={12}>
+                <ParamSliders {...paramSliderParams} />
+            </Grid>
+        </Grid>
     </Container>
 }
 
