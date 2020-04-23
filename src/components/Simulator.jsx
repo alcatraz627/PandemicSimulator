@@ -13,6 +13,8 @@ const PHASE = {
     D: 'D' //Dead
 }
 
+const FRAME_RATE = 300
+
 
 const createCell = (x, y, phase = PHASE.S, ti = null, tr = null) => ({ x, y, phase, ti, tr })
 
@@ -34,6 +36,7 @@ const Simulator = props => {
 
     const [T_inc, setT_inc] = useState(2) //Incubation Period
     const [T_r, setT_r] = useState(3) // Recovery Period
+    const [R_mort, setR_mort] = useState(0.2) // Mortality Rate
 
     const updateCells = (batch, phase) => {
         // let newGrid = Object.assign([], grid)
@@ -54,7 +57,7 @@ const Simulator = props => {
 
     const iterTick = () => {
         console.log("Frame++");
-        if ((Date.now() - lastUpdate.current) > 500) {
+        if ((Date.now() - lastUpdate.current) > FRAME_RATE) {
             setTick(tick => tick + 1)
             // console.log("iterated!", Date.now() - lastUpdate);
             lastUpdate.current = Date.now()
@@ -69,7 +72,10 @@ const Simulator = props => {
             // const infected = _.filter(_.flatten(grid), c => (c.phase == PHASE.I));
             // if (infected.length == SIZE * SIZE) { pause(); return } //Check if final 
 
-            let cellsToInfect = [], cellsToRecover = [], cellsToShowSymptoms = []
+            let cellsToInfect = [],
+                cellsToShowSymptoms = [],
+                cellsToRecover = [],
+                cellsToKill = []
 
             // To infect next
             _.map(infected, c => {
@@ -81,9 +87,13 @@ const Simulator = props => {
             cellsToShowSymptoms = _.filter(infected, c => (c.phase == PHASE.i) && (c.ti + T_inc <= tick))
             updateCells(cellsToShowSymptoms, PHASE.I)
 
-            // To recover
-            cellsToRecover = _.filter(infected, ({ x, y }) => (grid[y][x].ti + T_r <= tick))
+            // To remove from the network by either recovery or death
+            let cellsToRemove = _.filter(infected, ({ x, y }) => (grid[y][x].ti + T_r <= tick))
+            _.map(cellsToRemove, c => {
+                ((Math.random() > R_mort) ? cellsToRecover : cellsToKill).push(c)
+            })
             updateCells(cellsToRecover, PHASE.R)
+            updateCells(cellsToKill, PHASE.D)
 
 
 

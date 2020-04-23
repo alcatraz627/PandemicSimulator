@@ -11,7 +11,7 @@ const P_COLORS = {
     i: 'pink',
     I: 'red',
     R: 'grey',
-    D: 'darkgrey',
+    D: 'purple',
 }
 
 const useStyles = makeStyles(theme => ({
