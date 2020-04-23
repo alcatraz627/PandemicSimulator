@@ -9,8 +9,8 @@ const P_COLORS = {
     S: 'lightgrey',
     i: 'pink',
     I: 'red',
-    R: 'grey',
-    D: 'purple',
+    R: 'green',
+    D: 'darkgrey',
 }
 
 const useStyles = makeStyles(theme => ({
