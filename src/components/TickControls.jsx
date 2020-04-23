@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { Fab, Button, Typography, Divider } from '@material-ui/core'
-import { Pause, Forward, RotateRight } from '@material-ui/icons'
+import { Pause, PlayArrow, RotateRight, LastPage } from '@material-ui/icons'
 import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles(theme => ({
@@ -22,17 +22,18 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const TickControls = props => {
-    const { tick, isRunning, start, pause, reset } = props
+    const { tick, isRunning, start, pause, reset, step } = props
     const classes = useStyles()
 
     return <div className={classes.root}>
-        <Typography variant="h5">Day {tick}</Typography>
+        <Typography variant="h5">Day {tick + 1}</Typography>
         <Typography variant="button">{isRunning ? "Running" : "Stopped"}</Typography>
         <Divider />
         <div className={classes.btnGrp}>
-            <Fab className={classes.btn} onClick={pause} color="primary" disabled={!isRunning}><Pause/></Fab>
-            <Fab className={classes.btn} onClick={start} color="primary" disabled={isRunning}><Forward/></Fab>
-            <Fab className={classes.btn} onClick={reset} color="secondary" disabled={!isRunning}><RotateRight/></Fab>
+            <Fab className={classes.btn} onClick={pause} color="primary" disabled={!isRunning}><Pause /></Fab>
+            <Fab className={classes.btn} onClick={start} color="primary" disabled={isRunning}><PlayArrow /></Fab>
+            <Fab className={classes.btn} onClick={step} color="default" disabled={isRunning}><LastPage /></Fab>
+            <Fab className={classes.btn} onClick={reset} color="secondary" disabled={tick == 0}><RotateRight /></Fab>
         </div>
 
     </div>
