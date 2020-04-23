@@ -55,7 +55,7 @@ const createHistorySlice = ({ susceptible = 0, incubating = 0, symptomatic = 0, 
 const Simulator = props => {
     const classes = useStyles()
 
-    const SIZE = 21
+    const SIZE = Math.max(51, Math.min(5, window.location.search.split("=")[1])) || 31
 
     const [grid, setGrid] = useState(createGrid(SIZE, INITIAL_PARAMS.N_init))
     const [tick, setTick] = useState(0)
@@ -102,7 +102,7 @@ const Simulator = props => {
             const infected = _.filter(_.flatten(grid), c => ((c.phase == PHASE.I) || (c.phase == PHASE.i)));
             // const infected = _.filter(_.flatten(grid), c => (c.phase == PHASE.I));
             // if (infected.length == SIZE * SIZE) { pause(); return } //Check if final 
-            if (history.length > 3 && _.isEqual(history[history.length - 1], history[history.length - 3])) { pause(); return }
+            // if (history.length > 3 && _.isEqual(history[history.length - 1], history[history.length - 3])) { pause(); return }
 
             let cellsToInfect = [],
                 cellsToShowSymptoms = [],

@@ -15,16 +15,18 @@ const ChartData = props => {
     const commonOptions = {
 
         fill: true,
-        lineTension: 0.1,
+        lineTension: 0.02,
         borderCapStyle: 'butt',
         borderDash: [],
         borderDashOffset: 0.0,
-        borderJoinStyle: 'miter',
-        pointBorderWidth: 1,
-        pointHoverRadius: 5,
-        pointHoverBorderWidth: 2,
+        borderJoinStyle: 'bevel',
+        borderWidth: 1,
+        pointBorderWidth: 2,
+        pointHoverRadius: 7,
+        pointHoverBorderWidth: 1,
         pointRadius: 1,
         pointHitRadius: 10,
+        // showLine:  false,
     }
 
     const data = React.useCallback(() => ({
@@ -34,7 +36,7 @@ const ChartData = props => {
                 ...commonOptions,
                 label: 'Dead',
                 backgroundColor: '#4e342eee',
-                // borderColor: 'rgba(75,192,192,1)',
+                borderColor: '#333',
                 // pointBorderColor: 'rgba(75,192,192,1)',
                 // pointBackgroundColor: '#fff',
                 // pointHoverBackgroundColor: 'rgba(75,192,192,1)',
@@ -45,7 +47,7 @@ const ChartData = props => {
                 ...commonOptions,
                 label: 'Recovered',
                 backgroundColor: '#43a047ee',
-                // borderColor: 'rgba(75,192,192,1)',
+                borderColor: '#1b5e20',
                 // pointBorderColor: 'rgba(75,192,192,1)',
                 // pointBackgroundColor: '#fff',
                 // pointHoverBackgroundColor: 'rgba(75,192,192,1)',
@@ -56,7 +58,7 @@ const ChartData = props => {
                 ...commonOptions,
                 label: 'Symptomatic',
                 backgroundColor: '#e5393588',
-                // borderColor: 'rgba(75,192,192,1)',
+                borderColor: '#b71c1c',
                 // pointBorderColor: 'rgba(75,192,192,1)',
                 // pointBackgroundColor: '#fff',
                 // pointHoverBackgroundColor: 'rgba(75,192,192,1)',
@@ -67,7 +69,7 @@ const ChartData = props => {
                 ...commonOptions,
                 label: 'Incubating',
                 backgroundColor: '#9575cdff',
-                // borderColor: 'rgba(75,192,192,1)',
+                borderColor: '#f06292',
                 // pointBorderColor: 'rgba(75,192,192,1)',
                 // pointBackgroundColor: '#fff',
                 // pointHoverBackgroundColor: 'rgba(75,192,192,1)',
@@ -79,6 +81,7 @@ const ChartData = props => {
                 label: 'Susceptible',
                 // backgroundColor: 'rgba(75,192,192,0.4)',
                 backgroundColor: '#29b6f644',
+                borderColor: '#616161',
                 // borderColor: 'rgba(75,192,192,1)',
                 // pointBorderColor: 'rgba(75,192,192,1)',
                 // pointBackgroundColor: '#fff',
@@ -98,10 +101,31 @@ const ChartData = props => {
     // )
 
     const options = {
+        aspectRatio: 3,
+        // maintainAspectRatio: false,
+        legend: {
+            position: 'bottom',
+        },
+        title: {
+            display: true,
+            text: "State of the populations's health",
+            fontSize: '20',
+        },
         scales: {
+
             yAxes: [{
-                stacked: true
-            }]
+                stacked: true,
+                scaleLabel: {
+                    display: true,
+                    labelString: "Population"
+                }
+            }],
+            xAxes: [{
+                scaleLabel: {
+                    display: true,
+                    labelString: "Time",
+                }
+            }],
         }
     }
 
@@ -113,9 +137,9 @@ const ChartData = props => {
     }, [history])
 
 
-    return <div style={{ width: '90%', height: '70%', margin: '20px', }}>
+    return <div style={{ margin: '20px', }}>
         {/* <Chart axes={axes} data={data} series={series} getSeriesStyle={getSeriesStyle} getDatumStyle={getDatumStyle} tooltip primaryCursor secondaryCursor /> */}
-        <Line data={data} options={options} />
+        <Line responsive data={data} height={220} options={options} />
         {/* {JSON.stringify(data)} */}
     </div>
 }
