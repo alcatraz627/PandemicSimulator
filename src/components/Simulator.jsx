@@ -68,7 +68,7 @@ const Simulator = props => {
     const [D_travel, setD_travel] = useState(INITIAL_PARAMS.D_travel) // Mortality Rate
     const [N_init, setN_init] = useState(INITIAL_PARAMS.N_init) // Count of initial pop infected
 
-    const [history, setHistory] = useState({})
+    const [history, setHistory] = useState([createHistorySlice({susceptible: SIZE*SIZE})])
 
     const updateCells = (batch, phase) => {
         // let newGrid = Object.assign([], grid)
@@ -102,6 +102,7 @@ const Simulator = props => {
             const infected = _.filter(_.flatten(grid), c => ((c.phase == PHASE.I) || (c.phase == PHASE.i)));
             // const infected = _.filter(_.flatten(grid), c => (c.phase == PHASE.I));
             // if (infected.length == SIZE * SIZE) { pause(); return } //Check if final 
+            if (history.length > 5 && _.isEqual(history[history.length - 1], history[history.length - 5])) { pause(); return }
 
             let cellsToInfect = [],
                 cellsToShowSymptoms = [],
@@ -154,7 +155,7 @@ const Simulator = props => {
 
         } else {
             setGrid(createGrid(SIZE, N_init))
-            setHistory([])
+            setHistory([createHistorySlice({susceptible: SIZE*SIZE})])
         }
     }, [tick])
 
@@ -202,7 +203,7 @@ const Simulator = props => {
                 <Typography variant="h5">Visualization of the population health</Typography>
                 <br />
                 <PopGrid gridData={grid} />
-                <TickControls tick={tick} isRunning={isRunning} start={start} reset={reset} pause={pause} step={step}/>
+                <TickControls tick={tick} isRunning={isRunning} start={start} reset={reset} pause={pause} step={step} />
             </Grid>
             <Grid item md={7} xs={12}>
                 {/* </Grid>
