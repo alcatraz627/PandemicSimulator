@@ -26,12 +26,12 @@ const PHASE = {
 const FRAME_RATE = 0
 
 const INITIAL_PARAMS = {
-    T_inc: 2, //Incubation Period
-    T_r: 3, // Recovery Period
+    T_inc: 4, //Incubation Period
+    T_r: 6, // Recovery Period
     R_naught: 0.2, // Infection Rate
     R_mort: 0.2, // Mortality Rate,
-    D_travel: 3, // Travel radius
-    N_init: 1, // Count of initial population affected
+    D_travel: 5, // Travel radius
+    N_init: 3, // Count of initial population affected
 }
 
 
@@ -55,7 +55,7 @@ const createHistorySlice = ({ susceptible = 0, incubating = 0, symptomatic = 0, 
 const Simulator = props => {
     const classes = useStyles()
 
-    const SIZE = Math.max(51, Math.min(5, window.location.search.split("=")[1])) || 31
+    const SIZE = Math.min(91, Math.max(5, window.location.search.split("=")[1])) || 81
 
     const [grid, setGrid] = useState(createGrid(SIZE, INITIAL_PARAMS.N_init))
     const [tick, setTick] = useState(0)
@@ -68,15 +68,12 @@ const Simulator = props => {
     const [D_travel, setD_travel] = useState(INITIAL_PARAMS.D_travel) // Mortality Rate
     const [N_init, setN_init] = useState(INITIAL_PARAMS.N_init) // Count of initial pop infected
 
-    const [history, setHistory] = useState([createHistorySlice({susceptible: SIZE*SIZE})])
+    const [history, setHistory] = useState([createHistorySlice({ susceptible: SIZE * SIZE })])
 
     const updateCells = (batch, phase) => {
-        // let newGrid = Object.assign([], grid)
-        // console.log("To Update: ", batch);
         setGrid(grid => {
             let newGrid = _.cloneDeep(grid)
             _.map(batch, ({ x, y }) => {
-                // console.log(`Upd ${x}, ${y} to ${phase}`);
                 newGrid[y][x].phase = phase
                 newGrid[y][x].ti = tick
             })
@@ -88,10 +85,8 @@ const Simulator = props => {
     let lastUpdate = useRef()
 
     const iterTick = () => {
-        console.log("Frame++");
         if ((Date.now() - lastUpdate.current) > FRAME_RATE) {
             setTick(tick => tick + 1)
-            // console.log("iterated!", Date.now() - lastUpdate);
             lastUpdate.current = Date.now()
         }
         tickerID.current = requestAnimationFrame(iterTick)
@@ -100,8 +95,6 @@ const Simulator = props => {
     useEffect(() => {
         if (tick > 0) {
             const infected = _.filter(_.flatten(grid), c => ((c.phase == PHASE.I) || (c.phase == PHASE.i)));
-            // const infected = _.filter(_.flatten(grid), c => (c.phase == PHASE.I));
-            // if (infected.length == SIZE * SIZE) { pause(); return } //Check if final 
             // if (history.length > 3 && _.isEqual(history[history.length - 1], history[history.length - 3])) { pause(); return }
 
             let cellsToInfect = [],
@@ -116,7 +109,6 @@ const Simulator = props => {
                     x: Math.floor(cx + Math.cos(angle) * D_travel),
                     y: Math.floor(cy + Math.sin(angle) * D_travel),
                 }
-                // console.log("From", cx, cy, " to ", newCoord, "; >>>", isValidCoord({ ...newCoord, size: SIZE }))
                 if (isValidCoord({ ...newCoord, size: SIZE }) && (grid[newCoord.y][newCoord.x].phase == PHASE.S) && (Math.random() < R_naught)) {
                     cellsToInfect.push(grid[newCoord.y][newCoord.x])
                 }
@@ -124,7 +116,7 @@ const Simulator = props => {
 
             // To infect next
             _.map(infected, c => {
-                cellsToInfect = [...cellsToInfect, ...(_.filter(getNeighbors(c.x, c.y, SIZE), ({ x, y }) => (grid[y][x].phase == PHASE.S) && (Math.random() < R_naught)))]
+                cellsToInfect = [...cellsToInfect, ...(_.filter(getNeighbors(c.x, c.y, SIZE), ({ x, y }) => (grid[y][x].phase == PHASE.S) && (Math.random() < (R_naught / ((c.phase == PHASE.i) ? 1 : 2)))))]
             })
 
             // To show symptoms
@@ -142,25 +134,26 @@ const Simulator = props => {
             updateCells(cellsToRecover, PHASE.R)
             updateCells(cellsToKill, PHASE.D)
 
-            setHistory(history => [...history, createHistorySlice({
-
-                susceptible: _.filter(_.flatten(grid), c => (c.phase == PHASE.S)).length,
-                incubating: _.filter(infected, c => c.phase == PHASE.i).length,
-                symptomatic: _.filter(infected, c => c.phase == PHASE.I).length,
-                recovered: _.filter(_.flatten(grid), c => (c.phase == PHASE.R)).length,
-                dead: _.filter(_.flatten(grid), c => (c.phase == PHASE.D)).length,
-
-            })])
+            setGrid(gridUpdated => {
+                // Log an entry
+                setHistory(history => [...history, createHistorySlice({
+                    susceptible: _.filter(_.flatten(gridUpdated), c => (c.phase == PHASE.S)).length,
+                    incubating: _.filter(_.flatten(gridUpdated), c => c.phase == PHASE.i).length,
+                    symptomatic: _.filter(_.flatten(gridUpdated), c => c.phase == PHASE.I).length,
+                    recovered: _.filter(_.flatten(gridUpdated), c => (c.phase == PHASE.R)).length,
+                    dead: _.filter(_.flatten(gridUpdated), c => (c.phase == PHASE.D)).length,
+                })])
+                return gridUpdated
+            })
 
 
         } else {
             setGrid(createGrid(SIZE, N_init))
-            setHistory([createHistorySlice({susceptible: SIZE*SIZE})])
+            setHistory([createHistorySlice({ susceptible: SIZE * SIZE })])
         }
     }, [tick])
 
     useEffect(() => {
-        console.log("IsRunning is now :", isRunning);
         if (isRunning) {
             lastUpdate.current = Date.now()
             tickerID.current = requestAnimationFrame(iterTick)
@@ -199,15 +192,19 @@ const Simulator = props => {
 
     return <div className={classes.root}>
         <Grid container>
-            <Grid item lg={5} xs={12}>
-                <Typography variant="h5">Visualization of the population health</Typography>
+            <Grid item lg={6} xs={12} style={{ textAlign: 'justify' }}>
+                <Typography variant="h4">Visualization of the population state</Typography><br />
+                <Typography variant="body1">The grid below is an abstract model representing a community where people travel around and interact with each other.
+                The state of infection of each individual is denoted by different colors as shown below the grid. The controls below the grid allow for starting, pausing, resetting and stepping through the simulation. One tick corresponds to one day.
+                </Typography>
                 <br />
-                <PopGrid gridData={grid} />
+                <PopGrid gridData={grid} stats={history[history.length - 1]} />
                 <TickControls tick={tick} isRunning={isRunning} start={start} reset={reset} pause={pause} step={step} />
             </Grid>
-            <Grid item lg={7} xs={12}>
-                {/* </Grid>
-            <Grid item md={12} xs={12}> */}
+            <Grid item lg={6} xs={12}>
+                <ChartData history={history} />
+            </Grid>
+            <Grid item md={12} xs={12}>
                 <ParamSliders {...paramSliderParams} />
             </Grid>
         </Grid>

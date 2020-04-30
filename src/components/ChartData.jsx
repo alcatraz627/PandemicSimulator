@@ -15,7 +15,7 @@ const ChartData = props => {
     const commonOptions = {
 
         fill: true,
-        lineTension: 0.02,
+        lineTension: 0.07,
         borderCapStyle: 'butt',
         borderDash: [],
         borderDashOffset: 0.0,
@@ -43,72 +43,47 @@ const ChartData = props => {
                 // pointHoverBorderColor: 'rgba(220,220,220,1)',
                 data: history.map(datum => datum.dead)
             },
-            {
-                ...commonOptions,
-                label: 'Recovered',
-                backgroundColor: '#43a047ee',
-                borderColor: '#1b5e20',
-                // pointBorderColor: 'rgba(75,192,192,1)',
-                // pointBackgroundColor: '#fff',
-                // pointHoverBackgroundColor: 'rgba(75,192,192,1)',
-                // pointHoverBorderColor: 'rgba(220,220,220,1)',
-                data: history.map(datum => datum.recovered)
-            },
+            // {
+            //     ...commonOptions,
+            //     label: 'Recovered',
+            //     backgroundColor: '#43a047ee',
+            //     borderColor: '#1b5e20',
+            //     data: history.map(datum => datum.recovered)
+            // },
             {
                 ...commonOptions,
                 label: 'Symptomatic',
                 backgroundColor: '#e5393588',
                 borderColor: '#b71c1c',
-                // pointBorderColor: 'rgba(75,192,192,1)',
-                // pointBackgroundColor: '#fff',
-                // pointHoverBackgroundColor: 'rgba(75,192,192,1)',
-                // pointHoverBorderColor: 'rgba(220,220,220,1)',
                 data: history.map(datum => datum.symptomatic)
             },
             {
                 ...commonOptions,
                 label: 'Incubating',
-                backgroundColor: '#9575cdff',
+                backgroundColor: '#ff111166',
                 borderColor: '#f06292',
-                // pointBorderColor: 'rgba(75,192,192,1)',
-                // pointBackgroundColor: '#fff',
-                // pointHoverBackgroundColor: 'rgba(75,192,192,1)',
-                // pointHoverBorderColor: 'rgba(220,220,220,1)',
                 data: history.map(datum => datum.incubating)
             },
             {
                 ...commonOptions,
-                label: 'Susceptible',
-                // backgroundColor: 'rgba(75,192,192,0.4)',
-                backgroundColor: '#29b6f644',
+                label: 'Healthy(Susceptible + Recovered)',
+                backgroundColor: '#43a04777',
+                // backgroundColor: '#29b6f644',
                 borderColor: '#616161',
-                // borderColor: 'rgba(75,192,192,1)',
-                // pointBorderColor: 'rgba(75,192,192,1)',
-                // pointBackgroundColor: '#fff',
-                // pointHoverBackgroundColor: 'rgba(75,192,192,1)',
-                // pointHoverBorderColor: 'rgba(220,220,220,1)',
-                data: history.map(datum => datum.susceptible)
+                data: history.map(datum => datum.susceptible + datum.recovered)
             },
         ]
     }), [history])
 
-    // const data = useMemo(() =>
-    //     // (history.length == 0) ? [] :
-    //     KEYS.map(k => ({
-    //         label: k,
-    //         data: history.length ? history.map((datum, i) => [i, datum[k.toLowerCase()]]) : []
-    //     })), [history]
-    // )
-
     const options = {
-        aspectRatio: 3,
-        // maintainAspectRatio: false,
+        aspectRatio: 2,
+        responsive: true,
         legend: {
             position: 'bottom',
         },
         title: {
             display: true,
-            text: "State of the populations's health",
+            text: "State of the population's health",
             fontSize: '20',
         },
         scales: {
@@ -129,17 +104,16 @@ const ChartData = props => {
         }
     }
 
-    useEffect(() => {
-        console.log('data be like');
-        console.log(data());
-        console.log('and history');
-        console.log(history);
-    }, [history])
+    // useEffect(() => {
+    //     console.log('data be like');
+    //     console.log(data());
+    //     console.log('and history');
+    //     console.log(history);
+    // }, [history])
 
 
-    return <div style={{ margin: '20px', }}>
-        {/* <Chart axes={axes} data={data} series={series} getSeriesStyle={getSeriesStyle} getDatumStyle={getDatumStyle} tooltip primaryCursor secondaryCursor /> */}
-        <Line responsive data={data} height={220} options={options} />
+    return <div style={{ margin: '20px 0', maxHeight: '600px' }}>
+        <Line responsive data={data} height={300} options={options} />
         {/* {JSON.stringify(data)} */}
     </div>
 }

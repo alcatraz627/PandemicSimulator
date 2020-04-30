@@ -9,8 +9,7 @@ const useStyles = makeStyles(theme => ({
     root: {
         margin: '30px 0',
         textAlign: 'center',
-        maxWidth: '600px',
-        // border: '1px dotted blue'
+        // maxWidth: '600px',
     },
     btnGrp: {
         margin: '20px auto',

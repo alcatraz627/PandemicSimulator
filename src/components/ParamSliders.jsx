@@ -4,7 +4,6 @@ import { Slider, Typography, Button, Divider, Grid } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import { purple } from '@material-ui/core/colors'
 
-import ChartData from './ChartData'
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -39,7 +38,7 @@ const ParamSliders = props => {
         D_travel, setD_travel,
         N_init, setN_init,
         
-        isRunning, tick, history,
+        isRunning, tick, 
         resetParams
     } = props
 
@@ -49,14 +48,9 @@ const ParamSliders = props => {
         <Typography variant="h5">Set model parameters</Typography>
         <br />
         <Grid container spacing={2}>
-            <Grid item sm={12} md={6}>
-            <ChartData history={history} />
-            </Grid>
-
-            <Grid item sm={12} md={6}>
+            <Grid item xs={12} sm={12} md={6} lg={4}>
                 <div className={classes.sliderBox}>
                     <Typography variant="h5">Effect of Human Activities</Typography>
-                    {/* <Typography variant="body2">Lorem ipsum dolor sit amet consectetur adipisicing elit. Saepe alias veniam quaerat eum sequi totam architecto ea consequuntur! Sequi laboriosam expedita sint vel, reiciendis perspiciatis nihil cupiditate distinctio soluta. Voluptate!</Typography> */}
 
                     <Divider className={classes.inSection} />
                     <Slider valueLabelDisplay="on" value={D_travel} onChange={(e, v) => { setD_travel(v) }}
@@ -68,15 +62,14 @@ const ParamSliders = props => {
 
                     <Slider valueLabelDisplay="on" value={N_init} onChange={(e, v) => { setN_init(v) }}
                         min={1} max={50} marks step={1} disabled={isRunning || tick > 0} />
-                    <Typography variant="h6">Number of people in the initial Population Infected</Typography>
-                    <Typography variant="subtitle1">Jamaati niggas</Typography>
+                    <Typography variant="h6">Initial Infection carriers</Typography>
+                    <Typography variant="subtitle1">Number of people in the initial population who are infected infected</Typography>
                 </div>
             </Grid>
 
-            <Grid item sm={12} md={6}>
+            <Grid item xs={12} sm={12} md={6} lg={4}>
                 <div className={classes.sliderBox}>
                     <Typography variant="h5">Incubation Period</Typography>
-                    {/* <Typography variant="body2">Lorem ipsum dolor sit amet consectetur adipisicing elit. Saepe alias veniam quaerat eum sequi totam architecto ea consequuntur! Sequi laboriosam expedita sint vel, reiciendis perspiciatis nihil cupiditate distinctio soluta. Voluptate!</Typography> */}
 
                     <Divider className={classes.inSection} />
                     <Slider valueLabelDisplay="on" value={T_inc} onChange={(e, v) => { setT_inc(v) }}
@@ -93,10 +86,9 @@ const ParamSliders = props => {
                 </div>
             </Grid>
 
-            <Grid item sm={12} md={6}>
+            <Grid item xs={12} sm={12} md={6} lg={4}>
                 <div className={classes.sliderBox}>
                     <Typography variant="h5">Virus Action</Typography>
-                    {/* <Typography variant="body2">Lorem ipsum dolor sit amet consectetur adipisicing elit. Saepe alias veniam quaerat eum sequi totam architecto ea consequuntur! Sequi laboriosam expedita sint vel, reiciendis perspiciatis nihil cupiditate distinctio soluta. Voluptate!</Typography> */}
 
                     <Divider className={classes.inSection} />
                     <Slider valueLabelDisplay="on" value={R_naught} onChange={(e, v) => { setR_naught(v) }}
@@ -112,7 +104,6 @@ const ParamSliders = props => {
                     <Typography variant="subtitle1">How likely is a patient to die</Typography>
                 </div>
             </Grid>
-
         </Grid>
     </div>
 }

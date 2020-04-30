@@ -9,15 +9,12 @@ import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
 
 import Simulator from './Simulator'
+import Writeup from './Writeup'
 
 const theme = createMuiTheme({
     palette: {
         primary: blue,
-        // secondary: green,
     },
-    //   status: {
-    //     danger: 'orange',
-    //   },
 });
 
 
@@ -27,10 +24,13 @@ const App = () => {
         <ThemeProvider theme={theme}>
             <AppBar>
                 <Toolbar>
-                    <Typography variant="h6">Pandemic Simulator</Typography>
+                    <Typography variant="h5">Pandemic Simulator</Typography>
+                    <div style={{flexGrow: 1}} />
+                    <Typography variant="button">Created by Team H GN6002 Let's Play To Learn  </Typography>
                 </Toolbar>
             </AppBar>
             <Simulator />
+            <Writeup />
         </ThemeProvider>
     )
 }
