@@ -32,6 +32,7 @@ const INITIAL_PARAMS = {
     R_mort: 0.2, // Mortality Rate,
     D_travel: 5, // Travel radius
     N_init: 3, // Count of initial population affected
+    P_healthcare: 0.6, // Capacity of the healthcare system
 }
 
 
@@ -42,7 +43,7 @@ const createGrid = (size, N_init) => {
     // const seed = (x, y) => (i == Math.floor(size * size / 2))
     const seed = _.map(Array(N_init), (x, j) => Math.floor(size * size * Math.random())) // To formulate how will the initial population be infected. // TODO: Add predefined modes 
     // console.log(seed);
-    return _.chunk(_.map(Array(size * size), (_GARBAGE_, i) => createCell(i % size, Math.floor(i / size), seed.includes(i) ? PHASE.I : PHASE.S)), size)
+    return _.chunk(_.map(Array(size * size), (_GARBAGE_, i) => createCell(i % size, Math.floor(i / size), seed.includes(i) ? PHASE.i : PHASE.S)), size)
 }
 
 const isValidCoord = ({ x, y, size }) => (x >= 0) && (y >= 0) && (x < size) && (y < size)
@@ -67,6 +68,7 @@ const Simulator = props => {
     const [R_mort, setR_mort] = useState(INITIAL_PARAMS.R_mort) // Mortality Rate
     const [D_travel, setD_travel] = useState(INITIAL_PARAMS.D_travel) // Mortality Rate
     const [N_init, setN_init] = useState(INITIAL_PARAMS.N_init) // Count of initial pop infected
+    const [P_healthcare, setP_healthcare] = useState(INITIAL_PARAMS.P_healthcare) // Capacity of the healthcare system
 
     const [history, setHistory] = useState([createHistorySlice({ susceptible: SIZE * SIZE })])
 
@@ -94,7 +96,9 @@ const Simulator = props => {
 
     useEffect(() => {
         if (tick > 0) {
-            const infected = _.filter(_.flatten(grid), c => ((c.phase == PHASE.I) || (c.phase == PHASE.i)));
+            let infected = _.filter(_.flatten(grid), c => ((c.phase == PHASE.I) || (c.phase == PHASE.i)));
+            let incubating = _.filter(infected, c => c.phase == PHASE.i)
+            let symptomatic = _.filter(infected, c => c.phase == PHASE.I)
             // if (history.length > 3 && _.isEqual(history[history.length - 1], history[history.length - 3])) { pause(); return }
 
             let cellsToInfect = [],
@@ -102,14 +106,16 @@ const Simulator = props => {
                 cellsToRecover = [],
                 cellsToKill = []
 
-            // Make some of them travel to random locations
-            _.map(infected, ({ x: cx, y: cy }) => {
+            // Make some of the asymptomatic infected travel to random locations
+            _.map(incubating, ({ x: cx, y: cy }) => {
                 let angle = 2 * Math.PI * Math.random() // A random angle in radians
                 let newCoord = {
                     x: Math.floor(cx + Math.cos(angle) * D_travel),
                     y: Math.floor(cy + Math.sin(angle) * D_travel),
                 }
-                if (isValidCoord({ ...newCoord, size: SIZE }) && (grid[newCoord.y][newCoord.x].phase == PHASE.S) && (Math.random() < R_naught)) {
+                if (isValidCoord({ ...newCoord, size: SIZE }) && (
+                    grid[newCoord.y][newCoord.x].phase == PHASE.S) &&
+                    (Math.random() < R_naught)) {
                     cellsToInfect.push(grid[newCoord.y][newCoord.x])
                 }
             })
@@ -124,10 +130,13 @@ const Simulator = props => {
 
             // To remove from the network by either recovery or death
             let cellsToRemove = _.filter(infected, ({ x, y }) => (grid[y][x].ti + T_inc + T_r <= tick))
-            _.map(cellsToRemove, c => {
-                ((Math.random() > R_mort) ? cellsToRecover : cellsToKill).push(c)
-            })
+            let symptomaticPercentage = symptomatic.length / (SIZE * SIZE)
 
+            let systemOverloadFactor = 1 + 2 * Math.max(0, symptomaticPercentage - P_healthcare)
+            _.map(cellsToRemove, c => {
+                (Math.random() < R_mort * systemOverloadFactor ?
+                    cellsToKill : cellsToRecover).push(c)
+            })
 
             updateCells(cellsToInfect, PHASE.i)
             updateCells(cellsToShowSymptoms, PHASE.I)
@@ -178,6 +187,7 @@ const Simulator = props => {
         R_mort, setR_mort,
         D_travel, setD_travel,
         N_init, setN_init,
+        P_healthcare, setP_healthcare,
         isRunning, tick,
         history,
         resetParams: () => {
@@ -187,6 +197,7 @@ const Simulator = props => {
             setR_mort(INITIAL_PARAMS.R_mort);
             setD_travel(INITIAL_PARAMS.D_travel);
             setN_init(INITIAL_PARAMS.N_init);
+            setP_healthcare(INITIAL_PARAMS.P_healthcare)
         },
     }
 

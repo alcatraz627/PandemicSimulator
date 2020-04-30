@@ -37,6 +37,7 @@ const ParamSliders = props => {
         R_mort, setR_mort,
         D_travel, setD_travel,
         N_init, setN_init,
+        P_healthcare, setP_healthcare,
         
         isRunning, tick, 
         resetParams
@@ -64,6 +65,12 @@ const ParamSliders = props => {
                         min={1} max={50} marks step={1} disabled={isRunning || tick > 0} />
                     <Typography variant="h6">Initial Infection carriers</Typography>
                     <Typography variant="subtitle1">Number of people in the initial population who are infected infected</Typography>
+
+                    <Divider className={classes.inSection} />
+                    <Slider valueLabelDisplay="on" value={P_healthcare} onChange={(e, v) => { setP_healthcare(v) }}
+                        min={0.05} max={1} marks step={0.05} disabled={isRunning || tick > 0} />
+                    <Typography variant="h6">Capacity of the healthcare system</Typography>
+                    <Typography variant="subtitle1">Percentage of the population that the healthcare system can tend to at any given time</Typography>
                 </div>
             </Grid>
 
